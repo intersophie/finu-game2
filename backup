@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Value Chain Builder - Step by Step</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1f8ceb 0%, #7b68ee 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 24px 48px rgba(31, 140, 235, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1f8ceb 0%, #2d5aa0 100%);
+            color: white;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .progress-section {
+            background: #f7f8fa;
+            padding: 24px 32px;
+            border-bottom: 1px solid #e1e5e9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress-info {
+            color: #425a72;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .progress-steps {
+            display: flex;
+            gap: 12px;
+        }
+
+        .step-indicator {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .step-indicator.completed {
+            background: #06d6a0;
+            color: white;
+        }
+
+        .step-indicator.current {
+            background: #1f8ceb;
+            color: white;
+            box-shadow: 0 0 0 3px rgba(31, 140, 235, 0.3);
+        }
+
+        .step-indicator.pending {
+            background: #e1e5e9;
+            color: #64748b;
+        }
+
+        .game-area {
+            padding: 32px;
+        }
+
+        .current-chain {
+            background: #f8fafc;
+            border: 3px solid #1f8ceb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr;
+            gap: 16px;
+            align-items: center;
+            position: relative;
+        }
+
+        .current-chain.completed {
+            border-color: #06d6a0;
+            background: linear-gradient(135deg, #d1f2eb 0%, #f0fdfa 100%);
+        }
+
+        .chain-step {
+            text-align: center;
+        }
+
+        .step-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #425a72;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .drop-zone {
+            min-height: 120px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 16px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            line-height: 1.3;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #1f8ceb;
+            background: #eef2ff;
+            transform: scale(1.02);
+        }
+
+        .drop-zone.filled {
+            background: #e0f2fe;
+            border-color: #1f8ceb;
+            color: #0c4a6e;
+            font-weight: 500;
+        }
+
+        .chain-arrow {
+            font-size: 1.8rem;
+            color: #06d6a0;
+            font-weight: bold;
+        }
+
+        .items-pool {
+            background: #f7f8fa;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .pool-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .pool-section {
+            margin-bottom: 24px;
+        }
+
+        .pool-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #425a72;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .draggable-item {
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            cursor: grab;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            line-height: 1.4;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .draggable-item:hover {
+            border-color: #1f8ceb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(31, 140, 235, 0.15);
+        }
+
+        .draggable-item.dragging {
+            opacity: 0.5;
+            transform: rotate(2deg);
+            z-index: 1000;
+        }
+
+        .draggable-item.used {
+            opacity: 0.3;
+            cursor: not-allowed;
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .draggable-item.used:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .feature-item {
+            border-left: 4px solid #1f8ceb;
+        }
+
+        .value-item {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .metric-item {
+            border-left: 4px solid #06d6a0;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 32px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #1f8ceb 0%, #7b68ee 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(31, 140, 235, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(31, 140, 235, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #06d6a0 0%, #00b894 100%);
+            box-shadow: 0 4px 12px rgba(6, 214, 160, 0.2);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 8px 20px rgba(6, 214, 160, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #636e72 0%, #2d3436 100%);
+            box-shadow: 0 4px 12px rgba(99, 110, 114, 0.2);
+        }
+
+        .feedback {
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+            font-size: 1.1rem;
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, #d1f2eb 0%, #a7f3d0 100%);
+            color: #065f46;
+            border: 2px solid #06d6a0;
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 48px;
+            border-radius: 16px;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            z-index: 1000;
+            display: none;
+            max-width: 500px;
+            border: 2px solid #06d6a0;
+        }
+
+        .celebration h2 {
+            color: #06d6a0;
+            margin-bottom: 16px;
+            font-size: 2rem;
+        }
+
+        .celebration p {
+            color: #425a72;
+            margin-bottom: 24px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(45, 52, 54, 0.8);
+            z-index: 999;
+            display: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 0.6s ease;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .game-container {
+                margin: 0;
+                border-radius: 12px;
+            }
+            
+            .header {
+                padding: 20px 16px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+                margin-bottom: 6px;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .progress-section {
+                padding: 16px;
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .game-area {
+                padding: 16px;
+            }
+            
+            .current-chain {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                padding: 16px;
+            }
+            
+            .chain-arrow {
+                transform: rotate(90deg);
+                margin: 4px 0;
+            }
+            
+            .drop-zone {
+                min-height: 100px;
+                padding: 16px;
+                font-size: 0.85rem;
+            }
+            
+            .items-pool {
+                padding: 16px;
+                margin-bottom: 24px;
+            }
+            
+            .pool-title {
+                font-size: 1.1rem;
+                margin-bottom: 16px;
+            }
+            
+            .items-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 10px;
+            }
+            
+            .draggable-item {
+                min-height: 80px;
+                padding: 16px 12px;
+                font-size: 0.85rem;
+                cursor: pointer;
+            }
+            
+            .draggable-item:active {
+                transform: scale(0.95);
+                background: #f1f5f9;
+            }
+            
+            .btn {
+                padding: 14px 20px;
+                margin: 4px;
+                font-size: 0.9rem;
+                display: block;
+                width: 100%;
+                max-width: 200px;
+                margin: 8px auto;
+            }
+            
+            .controls {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .celebration {
+                max-width: 90%;
+                padding: 32px 20px;
+                margin: 20px;
+            }
+            
+            .celebration h2 {
+                font-size: 1.6rem;
+                margin-bottom: 12px;
+            }
+            
+            .celebration p {
+                font-size: 1rem;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🔗 Value Chain Builder</h1>
+            <p>Build complete value chains step by step</p>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-info" id="progress-info">
+                Chain 1 of 5: Complete this chain to unlock the next one
+            </div>
+            <div class="progress-steps" id="progress-steps">
+                <!-- Step indicators will be populated here -->
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="current-chain" id="current-chain">
+                <!-- Current chain will be populated here -->
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+
+            <div class="items-pool">
+                <div class="pool-title">🧩 Drag the correct pieces to complete this value chain</div>
+                
+                <div class="pool-section">
+                    <div class="pool-label">🔧 Features</div>
+                    <div class="items-grid" id="features-pool">
+                        <!-- Features will be populated here -->
+                    </div>
+                </div>
+
+                <div class="pool-section">
+                    <div class="pool-label">💡 Business Values</div>
+                    <div class="items-grid" id="values-pool">
+                        <!-- Values will be populated here -->
+                    </div>
+                </div>
+
+                <div class="pool-section">
+                    <div class="pool-label">📊 Metrics Impact</div>
+                    <div class="items-grid" id="metrics-pool">
+                        <!-- Metrics will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn" id="check-btn" onclick="checkCurrentChain()" disabled>
+                    🔍 Check This Chain
+                </button>
+                <button class="btn btn-success" id="next-btn" onclick="nextChain()" style="display: none;">
+                    ➡️ Next Chain
+                </button>
+                <button class="btn btn-secondary" onclick="showHint()">💡 Hint</button>
+                <button class="btn btn-secondary" onclick="resetGame()">🔄 Start Over</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="celebration" id="celebration">
+        <h2>🎉 Value Chain Master!</h2>
+        <p id="celebration-text">You've successfully mapped all Fin AI features to their business value and measurable impact!</p>
+        <button class="btn btn-success" onclick="restartGame()">Play Again</button>
+    </div>
+
+    <script>
+        // Game data from your latest PDF table
+        const gameData = [
+            {
+                id: 1,
+                feature: "Customer Experience Score (CX Score)",
+                value: "Get your customer's real sentiment, allowing you to personalise their experience, escalate without being asked, understand what type of experience matters to them",
+                metrics: "CSAT, NPS"
+            },
+            {
+                id: 2,
+                feature: "Multi-source Generative Answers",
+                value: "It's as good an experience as talking to a human, except faster, in any language and at any time",
+                metrics: "First Contact Resolution Rate, Average Handle Time, Customer Effort Score"
+            },
+            {
+                id: 3,
+                feature: "No-code, End-to-End AI Agent Workspace",
+                value: "You have full control over making Fin better without relying on dev resources",
+                metrics: "Time to Value, Support Team Productivity, Rate of Continuous Improvement"
+            },
+            {
+                id: 4,
+                feature: "Easy Omnichannel Deployment",
+                value: "Give your customers a homogeneous experience and meet them where they are",
+                metrics: "Customer Effort Score, CSAT"
+            },
+            {
+                id: 5,
+                feature: "Fin Tasks",
+                value: "Outsource repetitive actions to Fin so it stops overwhelming your human team",
+                metrics: "Resolution Rate, Average Handle Time, Agent Escalation Rate, CSAT"
+            }
+        ];
+
+        let currentChainIndex = 0;
+        let completedChains = [];
+        let usedItems = [];
+        let currentChainState = { feature: null, value: null, metrics: null };
+        let draggedElement = null;
+        let touchItem = null;
+        let touchOffset = { x: 0, y: 0 };
+
+        function initializeGame() {
+            currentChainIndex = 0;
+            completedChains = [];
+            usedItems = [];
+            currentChainState = { feature: null, value: null, metrics: null };
+            
+            createProgressSteps();
+            loadCurrentChain();
+            populateItemPools();
+            initializeDragAndDrop();
+            updateProgress();
+        }
+
+        function createProgressSteps() {
+            const stepsContainer = document.getElementById('progress-steps');
+            stepsContainer.innerHTML = '';
+
+            gameData.forEach((item, index) => {
+                const step = document.createElement('div');
+                step.className = 'step-indicator';
+                step.textContent = index + 1;
+                
+                if (index < currentChainIndex) {
+                    step.classList.add('completed');
+                } else if (index === currentChainIndex) {
+                    step.classList.add('current');
+                } else {
+                    step.classList.add('pending');
+                }
+                
+                stepsContainer.appendChild(step);
+            });
+        }
+
+        function loadCurrentChain() {
+            const currentData = gameData[currentChainIndex];
+            const chainContainer = document.getElementById('current-chain');
+            
+            chainContainer.innerHTML = `
+                <div class="chain-step">
+                    <div class="step-label">Feature</div>
+                    <div class="drop-zone" data-type="feature">
+                        Drop the feature here
+                    </div>
+                </div>
+                <div class="chain-arrow">→</div>
+                <div class="chain-step">
+                    <div class="step-label">Business Value</div>
+                    <div class="drop-zone" data-type="value">
+                        Drop business value here
+                    </div>
+                </div>
+                <div class="chain-arrow">→</div>
+                <div class="chain-step">
+                    <div class="step-label">Metrics Impact</div>
+                    <div class="drop-zone" data-type="metrics">
+                        Drop metrics here
+                    </div>
+                </div>
+            `;
+
+            currentChainState = { feature: null, value: null, metrics: null };
+            clearFeedback();
+        }
+
+        function populateItemPools() {
+            const featuresPool = document.getElementById('features-pool');
+            const valuesPool = document.getElementById('values-pool');
+            const metricsPool = document.getElementById('metrics-pool');
+
+            featuresPool.innerHTML = '';
+            valuesPool.innerHTML = '';
+            metricsPool.innerHTML = '';
+
+            // Create arrays and shuffle independently
+            const features = gameData.map(item => ({ ...item, type: 'feature' }));
+            const values = gameData.map(item => ({ ...item, type: 'value' }));
+            const metrics = gameData.map(item => ({ ...item, type: 'metrics' }));
+
+            const shuffledFeatures = features.sort(() => Math.random() - 0.5);
+            const shuffledValues = values.sort(() => Math.random() - 0.5);
+            const shuffledMetrics = metrics.sort(() => Math.random() - 0.5);
+
+            // Add features
+            shuffledFeatures.forEach(item => {
+                const featureItem = document.createElement('div');
+                featureItem.className = 'draggable-item feature-item';
+                featureItem.draggable = true;
+                featureItem.dataset.type = 'feature';
+                featureItem.dataset.chainId = item.id;
+                featureItem.textContent = item.feature;
+                
+                if (usedItems.includes(`feature-${item.id}`)) {
+                    featureItem.classList.add('used');
+                    featureItem.draggable = false;
+                }
+                
+                featuresPool.appendChild(featureItem);
+            });
+
+            // Add values
+            shuffledValues.forEach(item => {
+                const valueItem = document.createElement('div');
+                valueItem.className = 'draggable-item value-item';
+                valueItem.draggable = true;
+                valueItem.dataset.type = 'value';
+                valueItem.dataset.chainId = item.id;
+                valueItem.textContent = item.value;
+                
+                if (usedItems.includes(`value-${item.id}`)) {
+                    valueItem.classList.add('used');
+                    valueItem.draggable = false;
+                }
+                
+                valuesPool.appendChild(valueItem);
+            });
+
+            // Add metrics
+            shuffledMetrics.forEach(item => {
+                const metricsItem = document.createElement('div');
+                metricsItem.className = 'draggable-item metric-item';
+                metricsItem.draggable = true;
+                metricsItem.dataset.type = 'metrics';
+                metricsItem.dataset.chainId = item.id;
+                metricsItem.textContent = item.metrics;
+                
+                if (usedItems.includes(`metrics-${item.id}`)) {
+                    metricsItem.classList.add('used');
+                    metricsItem.draggable = false;
+                }
+                
+                metricsPool.appendChild(metricsItem);
+            });
+        }
+
+        function initializeDragAndDrop() {
+            // Clear existing listeners
+            document.querySelectorAll('.draggable-item').forEach(item => {
+                item.removeEventListener('dragstart', handleDragStart);
+                item.removeEventListener('dragend', handleDragEnd);
+                item.removeEventListener('touchstart', handleTouchStart);
+                item.removeEventListener('touchmove', handleTouchMove);
+                item.removeEventListener('touchend', handleTouchEnd);
+            });
+
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.removeEventListener('dragover', handleDragOver);
+                zone.removeEventListener('drop', handleDrop);
+                zone.removeEventListener('dragleave', handleDragLeave);
+            });
+
+            // Add fresh listeners
+            document.querySelectorAll('.draggable-item:not(.used)').forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+                
+                // Touch events for mobile
+                item.addEventListener('touchstart', handleTouchStart, { passive: false });
+                item.addEventListener('touchmove', handleTouchMove, { passive: false });
+                item.addEventListener('touchend', handleTouchEnd, { passive: false });
+            });
+
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('drop', handleDrop);
+                zone.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+
+        function handleDragStart(e) {
+            if (e.target.classList.contains('used')) return;
+            draggedElement = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', '');
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedElement = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.target.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.target.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.target.classList.remove('drag-over');
+
+            if (!draggedElement) return;
+            handleDropLogic(e.target, draggedElement);
+        }
+
+        function handleTouchStart(e) {
+            if (e.target.classList.contains('used')) return;
+            
+            touchItem = e.target;
+            const touch = e.touches[0];
+            const rect = e.target.getBoundingClientRect();
+            touchOffset = {
+                x: touch.clientX - rect.left,
+                y: touch.clientY - rect.top
+            };
+            
+            e.target.classList.add('dragging');
+            e.preventDefault();
+        }
+
+        function handleTouchMove(e) {
+            if (!touchItem) return;
+            
+            e.preventDefault();
+            const touch = e.touches[0];
+            
+            touchItem.style.position = 'fixed';
+            touchItem.style.left = (touch.clientX - touchOffset.x) + 'px';
+            touchItem.style.top = (touch.clientY - touchOffset.y) + 'px';
+            touchItem.style.zIndex = '1000';
+            touchItem.style.pointerEvents = 'none';
+            
+            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            const dropZone = elementBelow?.closest('.drop-zone');
+            
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.classList.remove('drag-over');
+            });
+            
+            if (dropZone) {
+                dropZone.classList.add('drag-over');
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (!touchItem) return;
+            
+            const touch = e.changedTouches[0];
+            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            const dropZone = elementBelow?.closest('.drop-zone');
+            
+            touchItem.style.position = '';
+            touchItem.style.left = '';
+            touchItem.style.top = '';
+            touchItem.style.zIndex = '';
+            touchItem.style.pointerEvents = '';
+            touchItem.classList.remove('dragging');
+            
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.classList.remove('drag-over');
+            });
+            
+            if (dropZone) {
+                handleDropLogic(dropZone, touchItem);
+            }
+            
+            touchItem = null;
+        }
+
+        function handleDropLogic(dropZone, draggedItem) {
+            const dropType = dropZone.dataset.type;
+            const dragType = draggedItem.dataset.type;
+            const dragChainId = parseInt(draggedItem.dataset.chainId);
+
+            if (dropType !== dragType || draggedItem.classList.contains('used')) {
+                return;
+            }
+
+            // Clear previous content if any
+            const existingItem = dropZone.querySelector('.dropped-item');
+            if (existingItem) {
+                const existingChainId = parseInt(existingItem.dataset.chainId);
+                const existingType = existingItem.dataset.type;
+                
+                // Return previous item to available state
+                const originalItem = document.querySelector(`[data-chain-id="${existingChainId}"][data-type="${existingType}"]`);
+                if (originalItem) {
+                    originalItem.classList.remove('used');
+                    originalItem.draggable = true;
+                }
+                
+                currentChainState[dropType] = null;
+            }
+            
+            dropZone.innerHTML = '';
+            
+            // Clone the dragged element for the drop zone
+            const clonedElement = draggedItem.cloneNode(true);
+            clonedElement.classList.remove('dragging', 'draggable-item');
+            clonedElement.classList.add('dropped-item');
+            clonedElement.draggable = false;
+            clonedElement.dataset.chainId = dragChainId;
+            clonedElement.dataset.type = dropType;
+            
+            dropZone.appendChild(clonedElement);
+            dropZone.classList.add('filled');
+
+            // Update current chain state
+            currentChainState[dropType] = dragChainId;
+
+            // Mark original as used temporarily
+            draggedItem.classList.add('used');
+            draggedItem.draggable = false;
+
+            updateCheckButton();
+        }
+
+        function updateCheckButton() {
+            const checkBtn = document.getElementById('check-btn');
+            const isComplete = currentChainState.feature && currentChainState.value && currentChainState.metrics;
+            checkBtn.disabled = !isComplete;
+        }
+
+        function checkCurrentChain() {
+            const currentData = gameData[currentChainIndex];
+            const expectedId = currentData.id;
+            
+            const isCorrect = currentChainState.feature === expectedId && 
+                            currentChainState.value === expectedId && 
+                            currentChainState.metrics === expectedId;
+
+            const feedback = document.getElementById('feedback');
+            feedback.style.display = 'block';
+
+            if (isCorrect) {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = '🎉 Perfect! This value chain is correctly mapped. Ready for the next one?';
+                
+                // Mark items as permanently used
+                usedItems.push(`feature-${expectedId}`);
+                usedItems.push(`value-${expectedId}`);
+                usedItems.push(`metrics-${expectedId}`);
+                
+                completedChains.push(currentChainIndex);
+                
+                document.getElementById('current-chain').classList.add('completed', 'pulse');
+                document.getElementById('check-btn').style.display = 'none';
+                
+                if (currentChainIndex < gameData.length - 1) {
+                    document.getElementById('next-btn').style.display = 'inline-block';
+                } else {
+                    setTimeout(showFinalCelebration, 1000);
+                }
+                
+                setTimeout(() => {
+                    document.getElementById('current-chain').classList.remove('pulse');
+                }, 600);
+                
+            } else {
+                feedback.className = 'feedback incorrect';
+                
+                let expectedParts = [];
+                expectedParts.push(`Feature: ${currentData.feature}`);
+                expectedParts.push(`Value: ${currentData.value.substring(0, 50)}...`);
+                expectedParts.push(`Metrics: ${currentData.metrics}`);
+                
+                feedback.innerHTML = `❌ Not quite right. This chain should contain:<br><br><strong>${expectedParts.join('<br>')}</strong><br><br>Try again!`;
+                
+                // Return used items back to available state
+                if (currentChainState.feature) {
+                    const featureItem = document.querySelector(`[data-chain-id="${currentChainState.feature}"][data-type="feature"]`);
+                    if (featureItem) {
+                        featureItem.classList.remove('used');
+                        featureItem.draggable = true;
+                    }
+                }
+                if (currentChainState.value) {
+                    const valueItem = document.querySelector(`[data-chain-id="${currentChainState.value}"][data-type="value"]`);
+                    if (valueItem) {
+                        valueItem.classList.remove('used');
+                        valueItem.draggable = true;
+                    }
+                }
+                if (currentChainState.metrics) {
+                    const metricsItem = document.querySelector(`[data-chain-id="${currentChainState.metrics}"][data-type="metrics"]`);
+                    if (metricsItem) {
+                        metricsItem.classList.remove('used');
+                        metricsItem.draggable = true;
+                    }
+                }
+                
+                // Clear the current chain
+                document.querySelectorAll('.drop-zone').forEach(zone => {
+                    zone.innerHTML = zone.dataset.type === 'feature' ? 'Drop the feature here' :
+                                   zone.dataset.type === 'value' ? 'Drop business value here' :
+                                   'Drop metrics here';
+                    zone.classList.remove('filled');
+                });
+                
+                currentChainState = { feature: null, value: null, metrics: null };
+                updateCheckButton();
+                initializeDragAndDrop();
+            }
+        }
+
+        function nextChain() {
+            currentChainIndex++;
+            clearFeedback();
+            
+            document.getElementById('check-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').style.display = 'none';
+            
+            createProgressSteps();
+            loadCurrentChain();
+            populateItemPools();
+            initializeDragAndDrop();
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const progressInfo = document.getElementById('progress-info');
+            if (currentChainIndex < gameData.length) {
+                const currentData = gameData[currentChainIndex];
+                progressInfo.textContent = `Chain ${currentChainIndex + 1} of ${gameData.length}: ${currentData.feature}`;
+            }
+        }
+
+        function clearFeedback() {
+            document.getElementById('feedback').style.display = 'none';
+        }
+
+        function showHint() {
+            const currentData = gameData[currentChainIndex];
+            const hints = {
+                1: "Think about understanding customer emotions and satisfaction measurement",
+                2: "Focus on response quality, speed, and customer effort reduction",
+                3: "Consider team empowerment, deployment speed, and continuous improvement",
+                4: "Think about consistent experience and customer effort across channels",
+                5: "Focus on automation, reducing agent workload, and improving efficiency"
+            };
+            
+            const hint = hints[currentData.id] || "Think about what business value this feature provides and how you'd measure its impact.";
+            alert(`💡 Hint for ${currentData.feature}:\n\n${hint}`);
+        }
+
+        function showFinalCelebration() {
+            let message = `Congratulations! You've successfully mapped all ${gameData.length} Fin AI features to their business value and measurable impact!\n\n`;
+            message += "🏆 You now understand how Fin AI features directly drive business outcomes and ROI.";
+            message += "\n\n🦙🦙🦙 IF YOU'RE DONE FIRST, SHOUT ALPACA TO CLAIM YOUR PRIZE! 🦙🦙🦙";
+
+            document.getElementById('celebration-text').textContent = message;
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('celebration').style.display = 'block';
+        }
+
+        function hideCelebration() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('celebration').style.display = 'none';
+        }
+
+        function resetGame() {
+            hideCelebration();
+            initializeGame();
+        }
+
+        function restartGame() {
+            hideCelebration();
+            initializeGame();
+        }
+
+        // Initialize the game when the page loads
+        window.addEventListener('load', initializeGame);
+    </script>
+</body>
+</html>
